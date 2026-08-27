@@ -1524,6 +1524,10 @@ describe("ProviderCommandReactor", () => {
       message: "Add a safer reconnect backoff.",
     });
     expect(harness.refreshStatus.mock.calls[0]?.[0]).toBe("/tmp/provider-project-worktree");
+    expect(harness.renameBranch.mock.calls[0]?.[0]).toMatchObject({
+      oldBranch: "t3code/1234abcd",
+      newBranch: expect.stringMatching(/^feature\//),
+    });
   });
 
   it("recreates a missing worktree from the thread branch before starting a turn", async () => {
