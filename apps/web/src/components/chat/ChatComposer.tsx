@@ -847,7 +847,9 @@ const runtimeModeConfig: Record<
   },
 };
 
-const runtimeModeOptions = Object.keys(runtimeModeConfig) as RuntimeMode[];
+const runtimeModeOptions = (Object.keys(runtimeModeConfig) as RuntimeMode[]).filter(
+  (mode) => mode !== "full-access",
+);
 const extendReplacementRangeForTrailingSpace = (
   text: string,
   rangeEnd: number,

@@ -132,7 +132,7 @@ prompt injection warning next to that choice. Untrusted content could re-run the
 without asking again.
 
 Antigravity can ask you to choose from a fixed set of answers. Select one of the offered
-choices. These questions do not accept custom text and still appear in **Full access** mode.
+choices. These questions do not accept custom text and appear in every permission mode.
 See [Permission modes](./permission-modes.md) for tool approvals.
 
 T3 Code keeps thread history and file diffs. Antigravity does not support conversation rewind,

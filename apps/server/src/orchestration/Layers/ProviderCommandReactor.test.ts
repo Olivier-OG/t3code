@@ -3018,7 +3018,7 @@ describe("ProviderCommandReactor", () => {
     const readModel = await harness.readModel();
     const thread = readModel.threads.find((entry) => entry.id === ThreadId.make("thread-1"));
     expect(thread?.session?.threadId).toBe("thread-1");
-    expect(thread?.session?.runtimeMode).toBe("full-access");
+    expect(thread?.session?.runtimeMode).toBe("auto");
   });
 
   it("rejects provider changes after a thread is already bound to a session provider", async () => {
