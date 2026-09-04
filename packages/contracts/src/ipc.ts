@@ -1131,6 +1131,11 @@ export interface DesktopBridge {
    * them.
    */
   onQuitShortcut?: (listener: (event: QuitShortcutHintEvent) => void) => () => void;
+  /**
+   * Raises and focuses the app window. Optional: older desktop shells lack
+   * it, and web clients have no window to raise.
+   */
+  focusWindow?: () => Promise<void>;
   getWindowFullscreenState: () => boolean;
   onWindowFullscreenStateChange: (listener: (fullscreen: boolean) => void) => () => void;
   getUpdateState: () => Promise<DesktopUpdateState>;

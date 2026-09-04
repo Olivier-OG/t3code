@@ -85,6 +85,25 @@ export const getWindowFullscreenState = DesktopIpc.makeSyncIpcMethod({
   }),
 });
 
+/**
+ * Raises the app window. A native notification click lands in the renderer,
+ * which can navigate but cannot bring an Electron window to the front by
+ * itself.
+ */
+export const focusWindow = DesktopIpc.makeIpcMethod({
+  channel: IpcChannels.FOCUS_WINDOW_CHANNEL,
+  payload: Schema.Undefined,
+  result: Schema.Void,
+  handler: Effect.fn("desktop.ipc.window.focusWindow")(function* () {
+    const electronWindow = yield* ElectronWindow.ElectronWindow;
+    const window = yield* electronWindow.currentMainOrFirst;
+    if (Option.isNone(window)) {
+      return;
+    }
+    yield* electronWindow.reveal(window.value);
+  }),
+});
+
 export const getLocalEnvironmentBootstraps = DesktopIpc.makeSyncIpcMethod({
   channel: IpcChannels.GET_LOCAL_ENVIRONMENT_BOOTSTRAPS_CHANNEL,
   result: Schema.Array(DesktopEnvironmentBootstrapSchema),

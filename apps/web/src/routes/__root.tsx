@@ -22,6 +22,7 @@ import { SshPasswordPromptDialog } from "../components/desktop/SshPasswordPrompt
 import { DesktopAppActivationCoordinator } from "../components/desktop/DesktopAppActivationCoordinator";
 import { ProviderUpdateLaunchNotification } from "../components/ProviderUpdateLaunchNotification";
 import { SlowRpcRequestToastCoordinator } from "../components/SlowRpcRequestToastCoordinator";
+import { ThreadNotifications } from "../components/ThreadNotifications";
 import { ThemeEditorHost } from "../components/settings/ThemeEditorHost";
 import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
 import { useDefaultThemeAdoption } from "../hooks/useDefaultTheme";
@@ -152,6 +153,7 @@ function RootRouteView() {
         {primaryEnvironmentAuthenticated ? <EventRouter /> : null}
         {primaryEnvironmentAuthenticated ? <PlanAgentSelectionHeal /> : null}
         {primaryEnvironmentAuthenticated ? <ProviderUpdateLaunchNotification /> : null}
+        {primaryEnvironmentAuthenticated ? <ThreadNotifications /> : null}
         {appShell}
         {/* Above the router: a theme draft is judged by walking the app, so the
             editor has to survive navigation away from settings. */}
