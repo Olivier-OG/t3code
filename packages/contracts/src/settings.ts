@@ -264,6 +264,18 @@ export const ClientSettingsSchema = Schema.Struct({
   // Legacy plan mode. The composer's Build/Plan toggle was removed from the
   // default UI; this beta flag restores it (plus the /plan and /default slash
   // commands) for users who still rely on the old workflow.
+  /**
+   * Native desktop/browser notifications for threads that need attention.
+   * Off until the user turns it on: the browser permission prompt has to be
+   * asked for from a click, and an app that asks on first load gets denied
+   * for the life of the origin. The per-event switches below only apply
+   * while this one is on.
+   */
+  notificationsEnabled: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
+  notifyOnApproval: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
+  notifyOnInput: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
+  notifyOnCompletion: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
+  notifyOnFailure: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
   planModeEnabled: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(false))),
   showSkillsInSlashMenu: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
   // Legacy sidebar (the original per-project tree). Deliberately a fresh key
@@ -993,6 +1005,11 @@ export const ClientSettingsPatch = Schema.Struct({
       }),
     ),
   ),
+  notificationsEnabled: Schema.optionalKey(Schema.Boolean),
+  notifyOnApproval: Schema.optionalKey(Schema.Boolean),
+  notifyOnInput: Schema.optionalKey(Schema.Boolean),
+  notifyOnCompletion: Schema.optionalKey(Schema.Boolean),
+  notifyOnFailure: Schema.optionalKey(Schema.Boolean),
   planModeEnabled: Schema.optionalKey(Schema.Boolean),
   showSkillsInSlashMenu: Schema.optionalKey(Schema.Boolean),
   legacySidebarEnabled: Schema.optionalKey(Schema.Boolean),
