@@ -124,6 +124,7 @@ import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../
 import { Switch } from "../ui/switch";
 import { stackedThreadToast, toastManager } from "../ui/toast";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
+import { NotificationSettings } from "./NotificationSettings";
 import { ThemeLibrary } from "./ThemeSettings";
 import {
   backgroundActivityOverrideSettings,
@@ -2537,6 +2538,8 @@ export function GeneralSettingsPanel() {
           }
         />
       </SettingsSection>
+
+      <NotificationSettings />
 
       <SettingsSection title="About">
         {isElectron || HOSTED_APP_CHANNEL ? (

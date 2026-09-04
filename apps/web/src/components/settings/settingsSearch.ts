@@ -219,6 +219,38 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: ["base directory folder browser path home"],
   },
   {
+    id: "native-notifications",
+    title: "Notifications",
+    to: "/settings/general",
+    searchTerms: [
+      "native system desktop banner alert sound notify approval input completed finished failed",
+    ],
+  },
+  {
+    id: "notify-on-approval",
+    title: "Notify on approval requests",
+    to: "/settings/general",
+    searchTerms: ["notification permission ask blocked agent"],
+  },
+  {
+    id: "notify-on-input",
+    title: "Notify when input is needed",
+    to: "/settings/general",
+    searchTerms: ["notification question waiting answer agent"],
+  },
+  {
+    id: "notify-on-completion",
+    title: "Notify on completed turns",
+    to: "/settings/general",
+    searchTerms: ["notification finished done review agent"],
+  },
+  {
+    id: "notify-on-failure",
+    title: "Notify on failures",
+    to: "/settings/general",
+    searchTerms: ["notification error crashed session agent"],
+  },
+  {
     id: "unpin-confirmation",
     title: "Unpin confirmation",
     to: "/settings/general",
