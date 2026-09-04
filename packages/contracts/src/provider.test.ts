@@ -40,9 +40,9 @@ describe("ProviderSessionStartInput", () => {
           { id: "fastMode", value: true },
         ],
       },
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
     });
-    expect(parsed.runtimeMode).toBe("full-access");
+    expect(parsed.runtimeMode).toBe("auto");
     expect(parsed.modelSelection?.instanceId).toBe("codex");
     expect(parsed.modelSelection?.model).toBe("gpt-5.3-codex");
     expect(getOptionValue(parsed.modelSelection?.options, "reasoningEffort")).toBe("high");
@@ -72,7 +72,7 @@ describe("ProviderSessionStartInput", () => {
           { id: "fastMode", value: true },
         ],
       },
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
     });
     expect(parsed.provider).toBe("claudeAgent");
     expect(parsed.modelSelection?.instanceId).toBe("claudeAgent");
@@ -80,7 +80,7 @@ describe("ProviderSessionStartInput", () => {
     expect(getOptionValue(parsed.modelSelection?.options, "thinking")).toBe(true);
     expect(getOptionValue(parsed.modelSelection?.options, "effort")).toBe("max");
     expect(getOptionValue(parsed.modelSelection?.options, "fastMode")).toBe(true);
-    expect(parsed.runtimeMode).toBe("full-access");
+    expect(parsed.runtimeMode).toBe("auto");
   });
 
   it("accepts cursor provider", () => {
@@ -88,7 +88,7 @@ describe("ProviderSessionStartInput", () => {
       threadId: "thread-1",
       provider: "cursor",
       cwd: "/tmp/workspace",
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
       modelSelection: {
         provider: "cursor",
         model: "composer-2",
@@ -107,7 +107,7 @@ describe("ProviderSessionStartInput", () => {
       provider: "ollama",
       providerInstanceId: "ollama_local",
       cwd: "/tmp/workspace",
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
       modelSelection: {
         instanceId: "ollama_local",
         model: "llama3.3",
@@ -197,7 +197,7 @@ describe("providerInstanceId routing key (slice-2 invariant)", () => {
     const parsed = decodeProviderSessionStartInput({
       threadId: "thread-1",
       provider: "codex",
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
     });
     expect(parsed.providerInstanceId).toBeUndefined();
   });
@@ -207,7 +207,7 @@ describe("providerInstanceId routing key (slice-2 invariant)", () => {
       threadId: "thread-1",
       provider: "codex",
       providerInstanceId: "codex_personal",
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
     });
     expect(parsed.providerInstanceId).toBe("codex_personal");
   });
@@ -217,7 +217,7 @@ describe("providerInstanceId routing key (slice-2 invariant)", () => {
       provider: "codex",
       providerInstanceId: "codex_work",
       status: "ready",
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
       threadId: "thread-1",
       createdAt: "2024-01-01T00:00:00Z",
       updatedAt: "2024-01-01T00:00:00Z",
@@ -230,7 +230,7 @@ describe("providerInstanceId routing key (slice-2 invariant)", () => {
       provider: "ollama",
       providerInstanceId: "ollama_local",
       status: "ready",
-      runtimeMode: "full-access",
+      runtimeMode: "auto",
       threadId: "thread-1",
       createdAt: "2024-01-01T00:00:00Z",
       updatedAt: "2024-01-01T00:00:00Z",
@@ -260,7 +260,7 @@ describe("providerInstanceId routing key (slice-2 invariant)", () => {
         threadId: "thread-1",
         provider: "codex",
         providerInstanceId: "1bad",
-        runtimeMode: "full-access",
+        runtimeMode: "auto",
       }),
     ).toThrow();
   });

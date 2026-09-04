@@ -363,7 +363,9 @@ const runtimeModeConfig: Record<
   },
 };
 
-const runtimeModeOptions = Object.keys(runtimeModeConfig) as RuntimeMode[];
+const runtimeModeOptions = (Object.keys(runtimeModeConfig) as RuntimeMode[]).filter(
+  (mode) => mode !== "full-access",
+);
 const COMPOSER_FLOATING_LAYER_SELECTOR = [
   '[data-composer-drawer-layer="true"]',
   '[data-slot="popover-popup"]',

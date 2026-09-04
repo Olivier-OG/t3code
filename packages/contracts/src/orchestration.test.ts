@@ -6,6 +6,7 @@ import * as Schema from "effect/Schema";
 import {
   DEFAULT_PROVIDER_INTERACTION_MODE,
   DEFAULT_RUNTIME_MODE,
+  RuntimeMode,
   ClientOrchestrationCommand,
   ModelSelection,
   OrchestrationCommand,
@@ -389,11 +390,11 @@ it.effect("preserves explicit provider and runtime mode in thread.turn.start", (
         provider: "codex",
         model: "gpt-5.4",
       },
-      runtimeMode: "full-access",
+      runtimeMode: "approval-required",
       createdAt: "2026-01-01T00:00:00.000Z",
     });
     assert.strictEqual(parsed.modelSelection?.instanceId, "codex");
-    assert.strictEqual(parsed.runtimeMode, "full-access");
+    assert.strictEqual(parsed.runtimeMode, "approval-required");
     assert.strictEqual(parsed.interactionMode, DEFAULT_PROVIDER_INTERACTION_MODE);
   }),
 );
@@ -1109,4 +1110,15 @@ it("isProviderSendTurnSupportedImageMimeType accepts raster formats and rejects 
   assert.strictEqual(isProviderSendTurnSupportedImageMimeType("image/png"), true);
   assert.strictEqual(isProviderSendTurnSupportedImageMimeType("IMAGE/JPEG"), true);
   assert.strictEqual(isProviderSendTurnSupportedImageMimeType("image/svg+xml"), false);
+});
+
+it("decodes the withdrawn full-access runtime mode as auto", () => {
+  const decodeRuntimeMode = Schema.decodeUnknownSync(RuntimeMode);
+  // Threads, events, and bindings written while full access was still offered
+  // must keep decoding, capped at auto rather than failing or bypassing.
+  assert.strictEqual(decodeRuntimeMode("full-access"), "auto");
+  assert.strictEqual(decodeRuntimeMode("approval-required"), "approval-required");
+  assert.strictEqual(decodeRuntimeMode("auto-accept-edits"), "auto-accept-edits");
+  assert.strictEqual(decodeRuntimeMode("auto"), "auto");
+  assert.strictEqual(DEFAULT_RUNTIME_MODE, "auto");
 });

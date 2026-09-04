@@ -117,14 +117,35 @@ export const ModelSelection = ModelSelectionSource.pipe(
 );
 export type ModelSelection = typeof ModelSelection.Type;
 
-export const RuntimeMode = Schema.Literals([
+const RuntimeModeWire = Schema.Literals([
   "approval-required",
   "auto-accept-edits",
   "auto",
   "full-access",
 ]);
+type RuntimeModeWire = typeof RuntimeModeWire.Type;
+
+/**
+ * `RuntimeMode` — the safety/access mode for a thread or session.
+ *
+ * Fork policy: `full-access` is withdrawn. The literal stays on the wire so
+ * threads, events, projection rows, and provider bindings written while it was
+ * still offered keep decoding, but decoding rewrites it to `auto`. Everything
+ * that reaches an adapter, a projection row, or a client passes through this
+ * decode, so the transform is the only place the removal lives — no migration,
+ * and no adapter can be handed a mode that bypasses approvals.
+ */
+export const RuntimeMode = RuntimeModeWire.pipe(
+  Schema.decodeTo(
+    RuntimeModeWire,
+    SchemaTransformation.transform({
+      decode: (mode): RuntimeModeWire => (mode === "full-access" ? "auto" : mode),
+      encode: (mode) => mode,
+    }),
+  ),
+);
 export type RuntimeMode = typeof RuntimeMode.Type;
-export const DEFAULT_RUNTIME_MODE: RuntimeMode = "full-access";
+export const DEFAULT_RUNTIME_MODE: RuntimeMode = "auto";
 export const ProviderInteractionMode = Schema.Literals(["default", "plan"]);
 export type ProviderInteractionMode = typeof ProviderInteractionMode.Type;
 export const DEFAULT_PROVIDER_INTERACTION_MODE: ProviderInteractionMode = "default";

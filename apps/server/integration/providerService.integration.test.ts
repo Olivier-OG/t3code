@@ -337,7 +337,7 @@ it.live("reports runtime mode per turn and on mode transitions", () =>
 
     yield* Effect.gen(function* () {
       const provider = yield* ProviderService;
-      const startSession = (runtimeMode: "approval-required" | "full-access") =>
+      const startSession = (runtimeMode: "approval-required" | "auto") =>
         provider.startSession(threadId, {
           threadId,
           provider: ProviderDriverKind.make("codex"),
@@ -357,12 +357,12 @@ it.live("reports runtime mode per turn and on mode transitions", () =>
 
       // Toggling the mode restarts the session, which is the only place the
       // transition is observable.
-      yield* startSession("full-access");
+      yield* startSession("auto");
       yield* runTurn({
         provider,
         harness: fixture.harness,
         threadId,
-        userText: "full access turn",
+        userText: "auto turn",
         response: { events: codexTurnTextFixture },
       });
 
@@ -372,14 +372,14 @@ it.live("reports runtime mode per turn and on mode transitions", () =>
         recorded
           .filter((entry) => entry.event === "provider.turn.sent")
           .map((entry) => entry.properties?.runtimeMode),
-        ["approval-required", "full-access"],
+        ["approval-required", "auto"],
       );
 
       assert.deepEqual(
         recorded
           .filter((entry) => entry.event === "provider.runtime_mode.changed")
           .map((entry) => [entry.properties?.from, entry.properties?.to]),
-        [["approval-required", "full-access"]],
+        [["approval-required", "auto"]],
       );
     }).pipe(Effect.provide(fixture.layer));
   }).pipe(Effect.provide(NodeServices.layer)),

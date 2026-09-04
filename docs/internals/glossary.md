@@ -103,7 +103,7 @@ The live provider-backed runtime attached to a thread. Session shape is in [the 
 
 #### Runtime mode
 
-The safety/access mode for a thread or session. [The contracts][1] define four values: `approval-required`, `auto-accept-edits`, `auto`, and `full-access`. See [permission modes][18].
+The safety/access mode for a thread or session. [The contracts][1] offer three values: `approval-required`, `auto-accept-edits`, and `auto`. `full-access` is withdrawn in this fork: the literal stays on the wire so older threads, events, and provider bindings keep decoding, but decoding rewrites it to `auto`, so no session can bypass approvals. See [permission modes][18].
 
 #### Interaction mode
 

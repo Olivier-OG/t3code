@@ -304,7 +304,7 @@ projectionSnapshotLayer("ProjectionSnapshotQuery", (it) => {
             model: "gpt-5-codex",
           },
           interactionMode: "default",
-          runtimeMode: "full-access",
+          runtimeMode: "auto",
           branch: null,
           worktreePath: null,
           linkedPullRequest: {
@@ -430,7 +430,7 @@ projectionSnapshotLayer("ProjectionSnapshotQuery", (it) => {
             model: "gpt-5-codex",
           },
           interactionMode: "default",
-          runtimeMode: "full-access",
+          runtimeMode: "auto",
           branch: null,
           worktreePath: null,
           linkedPullRequest: {
