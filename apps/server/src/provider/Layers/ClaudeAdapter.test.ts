@@ -377,7 +377,7 @@ describe("ClaudeAdapterLive", () => {
     );
   });
 
-  it.effect("derives bypass permission mode from full-access runtime policy", () => {
+  it.effect("never derives bypass permission mode, even from a full-access runtime policy", () => {
     const harness = makeHarness();
     return Effect.gen(function* () {
       const adapter = yield* ClaudeAdapter;
@@ -395,8 +395,8 @@ describe("ClaudeAdapterLive", () => {
         append:
           "<runtime_info>In case you're asked: you are running in T3 Code through the Claude Code harness. No need to mention this otherwise. You can embed images and videos in your response using Markdown with absolute file paths.</runtime_info>",
       });
-      assert.equal(createInput?.options.permissionMode, "bypassPermissions");
-      assert.equal(createInput?.options.allowDangerouslySkipPermissions, true);
+      assert.equal(createInput?.options.permissionMode, undefined);
+      assert.equal(createInput?.options.allowDangerouslySkipPermissions, undefined);
     }).pipe(
       Effect.provideService(Random.Random, makeDeterministicRandomService()),
       Effect.provide(harness.layer),
@@ -436,25 +436,6 @@ describe("ClaudeAdapterLive", () => {
       assert.deepEqual(createInput?.options.settingSources, ["user", "project", "local"]);
       assert.equal(createInput?.options.permissionMode, undefined);
       assert.equal(createInput?.options.allowDangerouslySkipPermissions, undefined);
-    }).pipe(
-      Effect.provideService(Random.Random, makeDeterministicRandomService()),
-      Effect.provide(harness.layer),
-    );
-  });
-
-  it.effect("uses bypass permissions for full-access claude sessions", () => {
-    const harness = makeHarness();
-    return Effect.gen(function* () {
-      const adapter = yield* ClaudeAdapter;
-      yield* adapter.startSession({
-        threadId: THREAD_ID,
-        provider: ProviderDriverKind.make("claudeAgent"),
-        runtimeMode: "full-access",
-      });
-
-      const createInput = harness.getLastCreateQueryInput();
-      assert.equal(createInput?.options.permissionMode, "bypassPermissions");
-      assert.equal(createInput?.options.allowDangerouslySkipPermissions, true);
     }).pipe(
       Effect.provideService(Random.Random, makeDeterministicRandomService()),
       Effect.provide(harness.layer),
@@ -6168,7 +6149,7 @@ describe("ClaudeAdapterLive", () => {
         tools: [],
         mcp_servers: [],
         model: SYNTHETIC_CLAUDE_STANDARD_MODEL,
-        permissionMode: "bypassPermissions",
+        permissionMode: "default",
         slash_commands: [],
         output_style: "default",
         skills: [],
@@ -6478,7 +6459,7 @@ describe("ClaudeAdapterLive", () => {
   });
 
   it.effect.each<{ runtimeMode: RuntimeMode; expectedBase: PermissionMode }>([
-    { runtimeMode: "full-access", expectedBase: "bypassPermissions" },
+    { runtimeMode: "auto", expectedBase: "auto" },
     { runtimeMode: "approval-required", expectedBase: "default" },
     { runtimeMode: "auto-accept-edits", expectedBase: "acceptEdits" },
   ])(

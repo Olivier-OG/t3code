@@ -16,8 +16,10 @@ stay inside its footprint.
   `packages/contracts/src/orchestration.ts` keeps the literal on the wire and rewrites it to `auto`
   on decode, so old threads and bindings still load. `DEFAULT_RUNTIME_MODE` is `auto`. The web
   composer, the compact controls menu, the mobile Runtime page and the web draft store all omit the
-  row. Docs (`permission-modes.md`, `providers-antigravity.md`, `glossary.md`) describe Auto as the
-  most permissive mode.
+  row. The Claude adapter has no `bypassPermissions` mapping and never passes the SDK's
+  skip-permissions option; the only mentions left are tests asserting their absence. Docs
+  (`permission-modes.md`, `providers-antigravity.md`, `glossary.md`) describe Auto as the most
+  permissive mode.
 - **Native notifications on web and desktop.** `apps/web/src/notifications/` and
   `ThreadNotifications.tsx` raise a system notification when a thread needs approval, asks a
   question, finishes or fails. Per-device toggles live in `NotificationSettings.tsx` and as
