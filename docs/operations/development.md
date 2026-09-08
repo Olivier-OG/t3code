@@ -138,6 +138,32 @@ For a cross-architecture or universal build, add the requested Rust targets:
 rustup target add aarch64-apple-darwin x86_64-apple-darwin
 ```
 
+### Installing a local macOS build
+
+`scripts/build-local-dmg.sh` is a one-shot wrapper around `dist:desktop:artifact` for running your
+own branch as your daily driver. It installs workspace dependencies, builds an unsigned DMG into
+`./release`, and can swap the result into `/Applications`.
+
+```bash
+./scripts/build-local-dmg.sh                     # build for the host arch
+./scripts/build-local-dmg.sh --install           # build, then replace the installed app
+./scripts/build-local-dmg.sh --skip-install      # reuse the existing node_modules
+./scripts/build-local-dmg.sh --arch universal    # needs the x86_64-apple-darwin rustup target
+./scripts/build-local-dmg.sh --build-version 0.0.38-local.2
+```
+
+- macOS only, and it needs the same toolchain as any other DMG build; see
+  [macOS DMG prerequisites](#macos-dmg-prerequisites).
+- `--arch` takes `arm64`, `x64`, or `universal` and defaults to the host architecture. Cross-arch
+  and universal builds need the matching rustup target, which Homebrew's `rust` does not provide.
+- `--build-version` labels the build, which is how you tell successive local installs apart in
+  Settings.
+- `--install` quits a running T3 Code before copying, because replacing a live bundle strands the
+  running process on a deleted inode. It then mounts the DMG and `ditto`s the app over
+  `/Applications`, removing the old bundle first so the copy is a replace rather than a merge.
+- These builds have no publish config, so they never auto-update. Upgrade by rerunning the script
+  with `--install`. On first launch macOS still requires right-click → **Open** on the unsigned app.
+
 ### Windows installer prerequisites
 
 Install Rust, Python 3, and Visual Studio Build Tools with **Desktop development with C++**.

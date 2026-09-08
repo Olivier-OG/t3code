@@ -52,5 +52,5 @@ Merge, never rebase: `main` is published and its history contains earlier merges
    literal. A new upstream mode picker or default shows up here first.
 4. Verify with `vp i`, then typecheck and the focused tests for contracts, web, desktop and
    server. Run mobile typecheck too when the merge touched `apps/mobile`.
-5. Merge the branch into `main`, push `origin`, and rebuild the desktop app from this checkout
-   with the `build:desktop` and `dist:desktop:*` scripts in the root `package.json`.
+5. Merge the branch into `main`, push `origin`, and rebuild from this checkout with
+   `scripts/build-local-dmg.sh --install`, which replaces the app in `/Applications`.
