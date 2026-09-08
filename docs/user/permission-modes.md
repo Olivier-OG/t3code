@@ -1,59 +1,33 @@
-# Permission Modes
+# Permission modes
 
-A permission mode controls how much the agent does on its own and when it stops to ask you.
+Permission modes control when an agent needs your approval to act. Choose a mode in the message
+composer; it applies to that thread.
 
-The mode is set per thread, from the mode control in the message composer. Changing it in one
-thread does not change any other thread. A thread created from inside another thread keeps that
-thread's mode; otherwise new threads start in **Auto** unless you pick something else
-before sending.
+New threads start in **Auto** unless you choose another mode before sending. A thread created
+from another thread inherits its mode.
 
-## The Modes
+There is no unattended mode. **Auto** is the most permissive setting available, so risky actions
+always come back to you. Threads created before that changed run in **Auto**.
 
-**Supervised**: ask before commands and file changes. The agent pauses and shows you what it
-wants to run or edit, and waits for approval. Work outside the workspace is restricted.
+| Mode                  | Behavior                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------- |
+| **Supervised**        | Requests approval for commands and file changes.                                      |
+| **Auto-accept edits** | Approves file edits automatically; other actions can still require approval.          |
+| **Auto**              | Uses the provider's automatic review to approve routine actions and ask about others. |
 
-**Auto-accept edits**: auto-approve edits, ask before other actions. File changes go through
-without prompting; commands and anything else still stop for approval.
+Approve or reject requests in the conversation to let the agent continue. Permission modes do
+not prevent the agent from asking questions about the task.
 
-**Auto**: routine actions proceed without you; risky ones still ask. How this is enforced depends
-on the provider: Codex delegates routine approvals to an AI reviewer, Claude uses its own auto
-permission mode, Cursor uses Smart Auto review, and providers without an equivalent (such as
-OpenCode and Antigravity) fall back to asking, like Supervised.
+## Provider differences
 
-There is no unattended mode. **Auto** is the most permissive setting available, so risky
-actions always come back to you. Threads created before that changed run in **Auto**.
-
-Approvals appear inline in the conversation. Approve or reject one and the agent continues from
-there.
+Providers enforce permissions differently. Some read-only actions can proceed in **Supervised**.
+**Auto** uses automatic review on Codex, Claude, and Cursor; providers without an equivalent,
+including OpenCode and Antigravity, fall back to asking.
 
 For Grok, **Always allow this session** remembers the matching command or tool input. Other
-actions still ask for approval. It does not change the thread's mode.
+actions still require approval.
 
-Antigravity uses its own permission policy for each mode. T3 Code still shows any approval or
-question the official agent sends, even in **Auto**. A remembered approval is available only
-when the agent offers it for that action. Fixed-choice questions require one of the offered
-answers and do not accept custom text.
+Antigravity can still send native approval requests in **Auto**. It only offers remembered
+approvals for actions that support them.
 
-## Choosing a Mode
-
-Use **Auto** for work in a worktree or a sandbox you can throw away.
-
-Use **Supervised** on a repository where an unwanted command is expensive, or the first time you
-run an unfamiliar task.
-
-**Auto-accept edits** suits refactors where the edits are the point and you only care about the
-shell commands.
-
-## Provider Behavior
-
-Each provider maps these modes onto its own approval and sandbox settings. Codex, for example,
-translates the mode into its approval policy and sandbox level, so **Supervised** runs the CLI
-with prompting enabled and a restricted workspace. Grok threads do the same: **Supervised**
-starts Grok in ask mode even if your Grok CLI config is set to always-approve. The labels above
-describe what you get; the exact per-provider translation is internal and may change.
-
-Mobile offers the same three modes with the same labels and descriptions.
-
-Antigravity's native `/plan` command requests a plan. It does not change the permission mode.
-T3 Code's separate Plan mode control is not available for Antigravity. See
-[Antigravity](./providers-antigravity.md) for setup and thread limits.
+See the [provider guides](./install.md#providers) for setup and provider-specific limits.
