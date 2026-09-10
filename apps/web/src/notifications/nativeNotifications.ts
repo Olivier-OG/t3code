@@ -40,19 +40,30 @@ export function nativeNotificationPermission(): NativeNotificationPermission | n
 }
 
 /**
- * Asks the browser for permission. Must be called from a user gesture: a
- * prompt raised on page load is denied for the whole origin in Chrome and
- * Safari, and that denial is not something the app can undo.
+ * Asks for permission. Must be called from a user gesture: a browser prompt
+ * raised on page load is denied for the whole origin in Chrome and Safari,
+ * and that denial is not something the app can undo.
+ *
+ * An already-decided permission is returned as-is rather than asked again.
+ * The desktop app arrives here already granted — Electron approves its own
+ * renderer without a prompt — and re-asking would put the answer behind a
+ * permission handler round trip for no gain.
  */
 export async function requestNativeNotificationPermission(): Promise<NativeNotificationPermission | null> {
   if (!nativeNotificationsSupported()) {
     return null;
   }
-  try {
-    return await window.Notification.requestPermission();
-  } catch {
+  if (window.Notification.permission !== "default") {
     return window.Notification.permission;
   }
+  try {
+    // Older Safari answers through a callback and returns undefined, so the
+    // resolved value is not load-bearing: the live permission is.
+    await window.Notification.requestPermission();
+  } catch {
+    // A refusal to even ask is answered by the permission itself, below.
+  }
+  return window.Notification.permission;
 }
 
 export interface NativeNotificationRequest {
