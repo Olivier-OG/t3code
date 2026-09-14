@@ -16,16 +16,13 @@ stay inside its footprint.
   `packages/contracts/src/orchestration.ts` keeps the literal on the wire and rewrites it to `auto`
   on decode, so old threads and bindings still load. `DEFAULT_RUNTIME_MODE` is `auto`. The web
   composer, the compact controls menu, the mobile Runtime page and the web draft store all omit the
-  row. The Claude adapter has no `bypassPermissions` mapping and never passes the SDK's
-  skip-permissions option; the only mentions left are tests asserting their absence. Docs
-  (`permission-modes.md`, `providers-antigravity.md`, `glossary.md`) describe Auto as the most
-  permissive mode.
-- **Native notifications on web and desktop.** `apps/web/src/notifications/` and
-  `ThreadNotifications.tsx` raise a system notification when a thread needs approval, asks a
-  question, finishes or fails. Per-device toggles live in `NotificationSettings.tsx` and as
-  `notificationsEnabled` / `notifyOn*` keys in `packages/contracts/src/settings.ts`. Clicking a
-  banner raises the window through the desktop `focusWindow` IPC method. User doc:
-  `docs/user/notifications.md`.
+  row; `runtimeModeOptions` in `apps/web/src/components/chat/runtimeModeConfig.ts` is the single
+  filter feeding both the composer picker and Settings → New threads → Permissions. Upstream's
+  `defaultRuntimeMode` server setting inherits `DEFAULT_RUNTIME_MODE`, so the environment default is
+  Auto and stored full-access defaults decode back to it. The Claude adapter has no
+  `bypassPermissions` mapping and never passes the SDK's skip-permissions option; the only mentions
+  left are tests asserting their absence. Docs (`permission-modes.md`, `providers-antigravity.md`,
+  `glossary.md`) describe Auto as the most permissive mode.
 - **Generated branch names carry no `t3code/` prefix.** `buildGeneratedWorktreeBranchName` in
   `ProviderCommandReactor.ts` returns the bare slug. The temporary pre-rename branch keeps its
   prefix, which is how T3 Code recognises its own throwaway branches.
@@ -37,6 +34,13 @@ stay inside its footprint.
 Retired: the fork once patched Claude text generation to stop passing
 `--dangerously-skip-permissions`. Upstream now isolates that CLI call itself, so the fork carries
 upstream's version.
+
+Retired: the fork once shipped native web and desktop notifications. Upstream's
+`ThreadNotificationCoordinator` now covers the same four moments and adds sound, badging, in-app
+toasts and click-to-open-thread, so the fork's `apps/web/src/notifications/`,
+`ThreadNotifications.tsx`, `notificationsEnabled` / `notifyOn*` client settings, `focusWindow` IPC
+and `docs/user/notifications.md` are gone. The `notifyOn*` keys still in `relay.ts` are upstream's
+mobile push preferences and unrelated.
 
 ## Syncing with upstream
 
