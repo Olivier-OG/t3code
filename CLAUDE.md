@@ -23,6 +23,12 @@ stay inside its footprint.
   `bypassPermissions` mapping and never passes the SDK's skip-permissions option; the only mentions
   left are tests asserting their absence. Docs (`permission-modes.md`, `providers-antigravity.md`,
   `glossary.md`) describe Auto as the most permissive mode.
+- **Remote SSH runtimes name an upstream release.** Upstream points a remote at
+  `environment.appVersion` and downloads `t3-<version>-<platform>` from its GitHub release.
+  This fork publishes no releases, so that URL always 404s and SSH environments fail to prepare
+  with `curl: (22)`. `REMOTE_ARCHIVE_UPSTREAM_VERSION` in `apps/desktop/src/main.ts` names the
+  upstream release this fork is merged up to instead. Only releases that attach `t3-<version>-*`
+  archives work, which today means the preview train, not stable or nightly.
 - **Generated branch names carry no `t3code/` prefix.** `buildGeneratedWorktreeBranchName` in
   `ProviderCommandReactor.ts` returns the bare slug. The temporary pre-rename branch keeps its
   prefix, which is how T3 Code recognises its own throwaway branches.
@@ -56,5 +62,10 @@ Merge, never rebase: `main` is published and its history contains earlier merges
    literal. A new upstream mode picker or default shows up here first.
 4. Verify with `vp i`, then typecheck and the focused tests for contracts, web, desktop and
    server. Run mobile typecheck too when the merge touched `apps/mobile`.
-5. Merge the branch into `main`, push `origin`, and rebuild from this checkout with
+5. Bump `REMOTE_ARCHIVE_UPSTREAM_VERSION` in `apps/desktop/src/main.ts` to the newest upstream
+   release that attaches `t3-<version>-*` archives, so remote SSH environments run the code this
+   sync landed on. Check with
+   `curl -s "https://api.github.com/repos/pingdotgg/t3code/releases?per_page=20"` and pick a tag
+   whose assets include `t3-`; nightly builds do not attach them.
+6. Merge the branch into `main`, push `origin`, and rebuild from this checkout with
    `scripts/build-local-dmg.sh --install`, which replaces the app in `/Applications`.

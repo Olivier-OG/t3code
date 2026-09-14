@@ -85,9 +85,22 @@ const desktopEnvironmentLayer = Layer.unwrap(
   }),
 );
 
-// The remote runs the exact release this app is on, from its self-contained
-// archive, so it needs neither Node nor npm. Development points the remote at
-// a source checkout instead so the two sides can be iterated together.
+/**
+ * The upstream release the remote runs, from its self-contained archive, so it
+ * needs neither Node nor npm.
+ *
+ * Fork policy: upstream sends `environment.appVersion` here, because upstream
+ * publishes a CLI archive for every release it ships. This fork publishes
+ * nothing, so that URL is always a 404 and every SSH environment fails to
+ * prepare. Name the upstream release this fork is merged up to instead, which
+ * keeps the desktop and the remote server on one wire protocol. Bump this when
+ * syncing upstream; only releases that actually attach `t3-<version>-*`
+ * archives work, which today means the preview train.
+ */
+const REMOTE_ARCHIVE_UPSTREAM_VERSION = "0.0.41-preview.20260914.1693";
+
+// Development points the remote at a source checkout instead so the two sides
+// can be iterated together.
 const resolveDesktopSshCliRunner = (
   environment: DesktopEnvironment.DesktopEnvironment["Service"],
 ): RemoteT3RunnerOptions => {
@@ -98,7 +111,7 @@ const resolveDesktopSshCliRunner = (
       nodeEngineRange: serverPackageJson.engines.node,
     };
   }
-  return { archiveVersion: environment.appVersion };
+  return { archiveVersion: REMOTE_ARCHIVE_UPSTREAM_VERSION };
 };
 
 const desktopSshEnvironmentLayer = Layer.unwrap(
