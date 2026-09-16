@@ -75,11 +75,7 @@ import { getDefaultServerModel } from "./providerModels";
 import { replaceComposerContextReferences } from "@t3tools/shared/composerContextReferences";
 import { UnifiedSettings } from "@t3tools/contracts/settings";
 import { ReviewCommentContextSchema, type ReviewCommentContext } from "./reviewCommentContext";
-const isRuntimeModeValue = Schema.is(RuntimeMode);
-// Drafts persisted while full access was still offered fall back to the
-// default rather than showing a mode this build no longer runs.
-const isRuntimeMode = (value: unknown): value is RuntimeMode =>
-  isRuntimeModeValue(value) && value !== "full-access";
+const isRuntimeMode = Schema.is(RuntimeMode);
 const isProviderDriverKind = Schema.is(ProviderDriverKind);
 const isReviewCommentContext = Schema.is(ReviewCommentContextSchema);
 const isSnapShotSource = Schema.is(SnapShotSource);

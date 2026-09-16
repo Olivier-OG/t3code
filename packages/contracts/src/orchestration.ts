@@ -125,35 +125,61 @@ export const ModelSelection = ModelSelectionSource.pipe(
 );
 export type ModelSelection = typeof ModelSelection.Type;
 
-const RuntimeModeWire = Schema.Literals([
+export const RuntimeMode = Schema.Literals([
   "approval-required",
   "auto-accept-edits",
   "auto",
   "full-access",
 ]);
-type RuntimeModeWire = typeof RuntimeModeWire.Type;
+export type RuntimeMode = typeof RuntimeMode.Type;
+export const DEFAULT_RUNTIME_MODE: RuntimeMode = "auto-accept-edits";
 
 /**
- * `RuntimeMode` — the safety/access mode for a thread or session.
- *
- * Fork policy: `full-access` is withdrawn. The literal stays on the wire so
- * threads, events, projection rows, and provider bindings written while it was
- * still offered keep decoding, but decoding rewrites it to `auto`. Everything
- * that reaches an adapter, a projection row, or a client passes through this
- * decode, so the transform is the only place the removal lives — no migration,
- * and no adapter can be handed a mode that bypasses approvals.
+ * Where an environment's work actually runs, as far as the client asking can
+ * tell: `host` is the machine running T3 Code for that client, `remote` is
+ * another machine, and `unknown` is a client that cannot tell them apart (the
+ * hosted web app and mobile, which are themselves the remote end).
  */
-export const RuntimeMode = RuntimeModeWire.pipe(
-  Schema.decodeTo(
-    RuntimeModeWire,
-    SchemaTransformation.transform({
-      decode: (mode): RuntimeModeWire => (mode === "full-access" ? "auto" : mode),
-      encode: (mode) => mode,
-    }),
-  ),
-);
-export type RuntimeMode = typeof RuntimeMode.Type;
-export const DEFAULT_RUNTIME_MODE: RuntimeMode = "auto";
+export type RuntimeModeMachineLocality = "host" | "remote" | "unknown";
+
+/**
+ * Fork policy: the modes that hand approval decisions to the provider are only
+ * offered for work that runs on another machine. `auto` and `full-access` let
+ * an agent act on the filesystem it is pointed at without the user in the
+ * loop, which this fork accepts on a remote box and not on the machine T3 Code
+ * itself runs on.
+ *
+ * Locality is a client-side question — a server is always local to itself — so
+ * these feed the mode pickers and the modes a client sends. A client that
+ * cannot place the machine offers the cautious list but leaves stored values
+ * alone, so a thread configured where the answer was known keeps its mode.
+ */
+const HOST_MACHINE_RUNTIME_MODES: ReadonlyArray<RuntimeMode> = [
+  "approval-required",
+  "auto-accept-edits",
+];
+const REMOTE_MACHINE_RUNTIME_MODES: ReadonlyArray<RuntimeMode> = [
+  "approval-required",
+  "auto-accept-edits",
+  "auto",
+  "full-access",
+];
+
+export function runtimeModesForMachine(
+  locality: RuntimeModeMachineLocality,
+): ReadonlyArray<RuntimeMode> {
+  return locality === "remote" ? REMOTE_MACHINE_RUNTIME_MODES : HOST_MACHINE_RUNTIME_MODES;
+}
+
+/** The mode as asked for, capped to what the host device is allowed to run. */
+export function clampRuntimeModeToMachine(
+  mode: RuntimeMode,
+  locality: RuntimeModeMachineLocality,
+): RuntimeMode {
+  if (locality !== "host" || HOST_MACHINE_RUNTIME_MODES.includes(mode)) return mode;
+  return "auto-accept-edits";
+}
+
 export const ProviderInteractionMode = Schema.Literals(["default", "plan"]);
 export type ProviderInteractionMode = typeof ProviderInteractionMode.Type;
 export const DEFAULT_PROVIDER_INTERACTION_MODE: ProviderInteractionMode = "default";
