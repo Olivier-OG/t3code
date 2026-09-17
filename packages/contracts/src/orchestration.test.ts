@@ -6,9 +6,10 @@ import { CommandId, ProjectId, ThreadId } from "./baseSchemas.ts";
 
 import {
   ProjectIconOverride,
+  clampRuntimeModeToMachine,
   DEFAULT_PROVIDER_INTERACTION_MODE,
   DEFAULT_RUNTIME_MODE,
-  RuntimeMode,
+  runtimeModesForMachine,
   type ChatImageAttachment,
   ClientOrchestrationCommand,
   ModelSelection,
@@ -1570,15 +1571,31 @@ it("isProviderSendTurnSupportedImageMimeType accepts raster formats and rejects 
   assert.strictEqual(isProviderSendTurnSupportedImageMimeType("image/svg+xml"), false);
 });
 
-it("decodes the withdrawn full-access runtime mode as auto", () => {
-  const decodeRuntimeMode = Schema.decodeUnknownSync(RuntimeMode);
-  // Threads, events, and bindings written while full access was still offered
-  // must keep decoding, capped at auto rather than failing or bypassing.
-  assert.strictEqual(decodeRuntimeMode("full-access"), "auto");
-  assert.strictEqual(decodeRuntimeMode("approval-required"), "approval-required");
-  assert.strictEqual(decodeRuntimeMode("auto-accept-edits"), "auto-accept-edits");
-  assert.strictEqual(decodeRuntimeMode("auto"), "auto");
-  assert.strictEqual(DEFAULT_RUNTIME_MODE, "auto");
+it("offers the approval-skipping runtime modes only for work on another machine", () => {
+  assert.deepStrictEqual(runtimeModesForMachine("remote"), [
+    "approval-required",
+    "auto-accept-edits",
+    "auto",
+    "full-access",
+  ]);
+  assert.deepStrictEqual(runtimeModesForMachine("host"), [
+    "approval-required",
+    "auto-accept-edits",
+  ]);
+  // A client that cannot place the machine offers the cautious list too.
+  assert.deepStrictEqual(runtimeModesForMachine("unknown"), runtimeModesForMachine("host"));
+  // Nothing a thread can inherit without a choice reaches the unattended modes.
+  assert.strictEqual(DEFAULT_RUNTIME_MODE, "auto-accept-edits");
+});
+
+it("caps a runtime mode only where the work is known to run on the host device", () => {
+  assert.strictEqual(clampRuntimeModeToMachine("full-access", "host"), "auto-accept-edits");
+  assert.strictEqual(clampRuntimeModeToMachine("auto", "host"), "auto-accept-edits");
+  assert.strictEqual(clampRuntimeModeToMachine("approval-required", "host"), "approval-required");
+  assert.strictEqual(clampRuntimeModeToMachine("full-access", "remote"), "full-access");
+  // Rewriting on an unplaceable client would downgrade a thread configured
+  // from one that could place it.
+  assert.strictEqual(clampRuntimeModeToMachine("full-access", "unknown"), "full-access");
 });
 const decodeProjectIcon = Schema.decodeUnknownEffect(ProjectIconOverride);
 const encodeProjectIcon = Schema.encodeEffect(ProjectIconOverride);

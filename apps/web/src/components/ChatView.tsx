@@ -20,6 +20,7 @@ import {
   type AssistantCitation,
   type ApprovalRequestId,
   type ChatFileAttachment,
+  clampRuntimeModeToMachine,
   DEFAULT_MODEL,
   type EnvironmentId,
   type MessageId,
@@ -41,6 +42,7 @@ import {
   ProviderInteractionMode,
   ProviderDriverKind,
   resolveEnvironmentMachineKind,
+  runtimeModesForMachine,
   RuntimeMode,
   TerminalOpenInput,
   type WorktreeSetupSnapshot,
@@ -352,6 +354,7 @@ import { sourceControlEnvironment } from "../state/sourceControl";
 import { useProjectClone } from "../state/projectClones";
 import { projectCloneDisplayName, projectCloneProgressSummary } from "@t3tools/contracts";
 import { useEnvironments, usePrimaryEnvironment } from "../state/environments";
+import { useEnvironmentMachineLocality } from "../state/machineLocality";
 import {
   useProject,
   useProjects,
@@ -1932,11 +1935,20 @@ export default function ChatView(props: ChatViewProps) {
   // session.lastError. Bump a tick so the banner hides immediately. Mirrors
   // the branch mismatch banner.
   const [, setThreadErrorBannerDismissTick] = useState(0);
-  const defaultRuntimeMode = resolveProjectSettings(settings, activeThread?.projectId ?? null)
-    .settings.defaultRuntimeMode;
+  // Every mode the composer shows or sends is capped by where the thread's
+  // work runs, whatever a draft or an inherited default asked for.
+  const threadMachineLocality = useEnvironmentMachineLocality(activeThread?.environmentId ?? null);
+  const runtimeModeOptions = runtimeModesForMachine(threadMachineLocality);
+  const defaultRuntimeMode = clampRuntimeModeToMachine(
+    resolveProjectSettings(settings, activeThread?.projectId ?? null).settings.defaultRuntimeMode,
+    threadMachineLocality,
+  );
   // Implicit drafts follow their current project/environment, including retargets.
   // Explicit composer choices and existing server threads retain their permissions.
-  const runtimeMode = composerRuntimeMode ?? activeServerThread?.runtimeMode ?? defaultRuntimeMode;
+  const runtimeMode = clampRuntimeModeToMachine(
+    composerRuntimeMode ?? activeServerThread?.runtimeMode ?? defaultRuntimeMode,
+    threadMachineLocality,
+  );
   const isLocalDraftThread = !isServerThread && localDraftThread !== undefined;
   const canCheckoutPullRequestIntoThread = isLocalDraftThread;
   const activeThreadId = activeThread?.id ?? null;
@@ -10069,6 +10081,7 @@ export default function ChatView(props: ChatViewProps) {
                             activeTaskSteps={activeComposerTaskSteps}
                             threadSyncPhase={activeEnvironmentUnavailable ? null : threadSyncPhase}
                             runtimeMode={runtimeMode}
+                            runtimeModeOptions={runtimeModeOptions}
                             interactionMode={interactionMode}
                             lockedProvider={lockedProvider}
                             providerStatuses={providerStatuses as ServerProvider[]}

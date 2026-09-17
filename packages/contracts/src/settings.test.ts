@@ -78,29 +78,15 @@ describe("ClientSettings rich text composer", () => {
 });
 
 describe("ServerSettings default permissions", () => {
-  // Fork policy: unattended mode is withdrawn, so the environment default is
-  // Auto and settings saved while full access existed decode back to it.
-  it("defaults to auto for settings saved before a default was configured", () => {
-    expect(decodeServerSettings({}).defaultRuntimeMode).toBe("auto");
-    expect(DEFAULT_SERVER_SETTINGS.defaultRuntimeMode).toBe("auto");
+  // Fork policy: the modes that skip approvals are only offered where the work
+  // runs on another machine, so nothing a thread inherits without a choice can
+  // name one.
+  it("defaults to auto-accept edits for settings saved before a default was configured", () => {
+    expect(decodeServerSettings({}).defaultRuntimeMode).toBe("auto-accept-edits");
+    expect(DEFAULT_SERVER_SETTINGS.defaultRuntimeMode).toBe("auto-accept-edits");
   });
 
-  it("rewrites a stored full-access default and project override to auto", () => {
-    const input = {
-      defaultRuntimeMode: "full-access",
-      projectSettingsOverrides: { project: { defaultRuntimeMode: "full-access" } },
-    };
-    expect(encodeServerSettings(decodeServerSettings(input))).toMatchObject({
-      defaultRuntimeMode: "auto",
-      projectSettingsOverrides: { project: { defaultRuntimeMode: "auto" } },
-    });
-    expect(decodeServerSettingsPatch(input)).toEqual({
-      defaultRuntimeMode: "auto",
-      projectSettingsOverrides: { project: { defaultRuntimeMode: "auto" } },
-    });
-  });
-
-  it.each(["approval-required", "auto-accept-edits", "auto"])(
+  it.each(["approval-required", "auto-accept-edits", "auto", "full-access"])(
     "round-trips %s as an environment default and project override",
     (defaultRuntimeMode) => {
       const input = {

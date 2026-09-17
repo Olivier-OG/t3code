@@ -436,7 +436,7 @@ describe("ClaudeAdapterLive", () => {
     );
   });
 
-  it.effect("never derives bypass permission mode, even from a full-access runtime policy", () => {
+  it.effect("derives bypass permission mode from full-access runtime policy", () => {
     const harness = makeHarness();
     return Effect.gen(function* () {
       const adapter = yield* ClaudeAdapter;
@@ -453,8 +453,8 @@ describe("ClaudeAdapterLive", () => {
         preset: "claude_code",
         append: buildRuntimeInstructions({ harness: "Claude Code" }),
       });
-      assert.equal(createInput?.options.permissionMode, undefined);
-      assert.equal(createInput?.options.allowDangerouslySkipPermissions, undefined);
+      assert.equal(createInput?.options.permissionMode, "bypassPermissions");
+      assert.equal(createInput?.options.allowDangerouslySkipPermissions, true);
     }).pipe(
       Effect.provideService(Random.Random, makeDeterministicRandomService()),
       Effect.provide(harness.layer),
@@ -480,9 +480,7 @@ describe("ClaudeAdapterLive", () => {
     );
   });
 
-  // Fork policy: unattended mode is withdrawn, so a skip-permissions launch arg
-  // cannot buy what the mode picker no longer offers.
-  it.effect("ignores a launch-arg skip-permissions flag and keeps the thread runtime mode", () => {
+  it.effect("lets a launch-arg skip-permissions flag override the thread runtime mode", () => {
     const harness = makeHarness({
       claudeConfig: { launchArgs: "--dangerously-skip-permissions --verbose" },
     });
@@ -495,9 +493,9 @@ describe("ClaudeAdapterLive", () => {
       });
 
       const createInput = harness.getLastCreateQueryInput();
-      assert.equal(createInput?.options.permissionMode, "acceptEdits");
-      assert.equal(createInput?.options.allowDangerouslySkipPermissions, undefined);
-      // The flag is still dropped from extraArgs so the CLI never sees it.
+      assert.equal(createInput?.options.permissionMode, "bypassPermissions");
+      assert.equal(createInput?.options.allowDangerouslySkipPermissions, true);
+      // The honored flag is dropped from extraArgs so the CLI sees it once.
       assert.deepEqual(createInput?.options.extraArgs, {
         verbose: null,
         "thinking-display": "summarized",
@@ -7419,6 +7417,7 @@ describe("ClaudeAdapterLive", () => {
   });
 
   it.effect.each<{ runtimeMode: RuntimeMode; expectedBase: PermissionMode }>([
+    { runtimeMode: "full-access", expectedBase: "bypassPermissions" },
     { runtimeMode: "auto", expectedBase: "auto" },
     { runtimeMode: "approval-required", expectedBase: "default" },
     { runtimeMode: "auto-accept-edits", expectedBase: "acceptEdits" },

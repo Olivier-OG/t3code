@@ -5,6 +5,7 @@ export { type ConnectionDriverProgress, type EnvironmentConnectionLease } from "
 export * from "./errors.ts";
 export * from "./githubRoutingPermissions.ts";
 export * as Connection from "./layer.ts";
+export * from "./machineLocality.ts";
 export * from "./model.ts";
 export {
   type BearerConnectionUpdateInput,

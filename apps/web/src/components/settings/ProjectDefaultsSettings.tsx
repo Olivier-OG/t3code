@@ -1,11 +1,14 @@
 import {
+  clampRuntimeModeToMachine,
   DEFAULT_SERVER_SETTINGS,
   EnvironmentId,
   type ModelSelection,
   type ProviderInstanceId,
+  runtimeModesForMachine,
 } from "@t3tools/contracts";
 import { createModelSelection } from "@t3tools/shared/model";
 import { useNavigate } from "@tanstack/react-router";
+import { useMemo } from "react";
 
 import { useT3ProjectFileState } from "../../hooks/useT3ProjectFileScripts";
 import { getCustomModelOptionsByInstance } from "../../modelSelection";
@@ -16,10 +19,11 @@ import {
   sortProviderInstanceEntries,
 } from "../../providerInstances";
 import { useEnvironments } from "../../state/environments";
+import { useScopeMachineLocality } from "../../state/machineLocality";
 import { EMPTY_SERVER_PROVIDERS } from "../../state/server";
 import { resolveEnvModeLabel } from "../BranchToolbar.logic";
 import { ProviderModelPicker } from "../chat/ProviderModelPicker";
-import { runtimeModeConfig, runtimeModeOptions } from "../chat/runtimeModeConfig";
+import { runtimeModeConfig } from "../chat/runtimeModeConfig";
 import { PULL_REQUEST_MERGE_METHOD_LABELS } from "../pullRequest/pullRequestDetail.logic";
 import { TraitsPicker } from "../chat/TraitsPicker";
 import { Select, SelectItem, SelectPopup, SelectTrigger, SelectValue } from "../ui/select";
@@ -70,6 +74,18 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
   const mixedModel = useScopedSettingsMixed(["defaultModelSelection"]);
   const mixedPermissions = useScopedSettingsMixed(["defaultRuntimeMode"]);
   const PermissionIcon = runtimeModeConfig[settings.defaultRuntimeMode].icon;
+  // Auto and Full access are only offered where the work runs on another
+  // machine, so a scope spanning the host device offers neither.
+  const scopedEnvironmentIds = useMemo(
+    () => targets.map((scopedTarget) => scopedTarget.environmentId),
+    [targets],
+  );
+  const scopeMachineLocality = useScopeMachineLocality(scopedEnvironmentIds);
+  const runtimeModeOptions = runtimeModesForMachine(scopeMachineLocality);
+  const cappedRuntimeMode = clampRuntimeModeToMachine(
+    settings.defaultRuntimeMode,
+    scopeMachineLocality,
+  );
   const mixedWorkspace = useScopedSettingsMixed(["defaultThreadEnvMode"]);
   const mixedBrowser = useScopedSettingsMixed(["enableAgentBrowserAccess"]);
   const mixedAutoPull = useScopedSettingsMixed(["defaultAutoPull"]);
@@ -228,6 +244,11 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
             settingKeys={["defaultRuntimeMode"]}
             mixed={mixedPermissions}
             {...searchableSetting("default-permissions")}
+            status={
+              cappedRuntimeMode !== settings.defaultRuntimeMode && !mixedPermissions
+                ? `Runs as ${runtimeModeConfig[cappedRuntimeMode].label} on this machine`
+                : undefined
+            }
             description={
               isProjectScope
                 ? "Permissions for new threads in this project."

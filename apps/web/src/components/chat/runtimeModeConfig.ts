@@ -26,9 +26,3 @@ export const runtimeModeConfig: Record<
     icon: LockOpenIcon,
   },
 };
-
-// This fork withdraws unattended mode: `full-access` stays in the wire contract so
-// old threads decode, but it is never offered as a choice.
-export const runtimeModeOptions = (Object.keys(runtimeModeConfig) as RuntimeMode[]).filter(
-  (mode) => mode !== "full-access",
-);

@@ -4702,6 +4702,13 @@ export const makeClaudeAdapter = Effect.fn("makeClaudeAdapter")(function* (
           } satisfies PermissionResult;
         }
 
+        if (input.runtimeMode === "full-access") {
+          return {
+            behavior: "allow",
+            updatedInput: toolInput,
+          } satisfies PermissionResult;
+        }
+
         const requestId = ApprovalRequestId.make(yield* randomUUIDv4);
         const requestType = classifyRequestType(toolName);
         const detail = summarizeToolRequest(toolName, toolInput);
@@ -4871,24 +4878,16 @@ export const makeClaudeAdapter = Effect.fn("makeClaudeAdapter")(function* (
       const runtimeModeToPermission: Record<string, PermissionMode> = {
         "auto-accept-edits": "acceptEdits",
         auto: "auto",
+        "full-access": "bypassPermissions",
       };
       // A permission launch arg is folded into the mode T3 sends rather than
       // passed through: the CLI resolves both inputs together, so argv order
-      // never let the user's flag win. Both flags are stripped from extraArgs
-      // either way, so the CLI never sees one twice.
-      //
-      // Fork policy: unattended mode is withdrawn, so no input reaches
-      // `bypassPermissions`. A launch arg asking for it falls back to the
-      // thread's runtime mode instead of overriding it.
-      const requestedPermissionMode =
+      // never let the user's flag win.
+      const permissionMode =
         (launchArgPermissionMode as PermissionMode | null | undefined) ??
         (launchArgSkipPermissions === null || launchArgSkipPermissions === "true"
           ? "bypassPermissions"
-          : undefined);
-      const permissionMode =
-        requestedPermissionMode && requestedPermissionMode !== "bypassPermissions"
-          ? requestedPermissionMode
-          : runtimeModeToPermission[input.runtimeMode];
+          : runtimeModeToPermission[input.runtimeMode]);
       const settings = {
         ...(typeof thinking === "boolean" ? { alwaysThinkingEnabled: thinking } : {}),
         ...(requestThinkingSummaries ? { showThinkingSummaries: true } : {}),
@@ -4937,6 +4936,9 @@ export const makeClaudeAdapter = Effect.fn("makeClaudeAdapter")(function* (
             }
           : {}),
         ...(permissionMode ? { permissionMode } : {}),
+        ...(permissionMode === "bypassPermissions"
+          ? { allowDangerouslySkipPermissions: true }
+          : {}),
         ...(Object.keys(settings).length > 0 ? { settings } : {}),
         ...(existingResumeSessionId ? { resume: existingResumeSessionId } : {}),
         ...(newSessionId ? { sessionId: newSessionId } : {}),
@@ -4976,6 +4978,7 @@ export const makeClaudeAdapter = Effect.fn("makeClaudeAdapter")(function* (
         "claude.query.model": apiModelId ?? "",
         "claude.query.effort": effectiveEffort ?? "",
         "claude.query.permission_mode": permissionMode ?? "",
+        "claude.query.allow_dangerously_skip_permissions": permissionMode === "bypassPermissions",
         "claude.query.resume": existingResumeSessionId ?? "",
         "claude.query.session_id": newSessionId ?? "",
         "claude.query.include_partial_messages": true,
