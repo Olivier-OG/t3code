@@ -62,7 +62,12 @@ import {
   NATIVE_MAIL_SEARCH_TOOLBAR_CONTENT_INSET,
   NATIVE_MAIL_SEARCH_TOOLBAR_SUPPORTED,
 } from "../layout/native-mail-search-toolbar";
-import { RUNTIME_MODE_CHOICES, selectableChoices } from "./thread-settings-options";
+import {
+  runtimeModeChoiceLabel,
+  runtimeModeChoices,
+  selectableChoices,
+} from "./thread-settings-options";
+import { useEnvironmentMachineLocality } from "../../state/machine-locality";
 import {
   canCommitPendingModel,
   modelMatchesCatalogQuery,
@@ -759,9 +764,7 @@ function ThreadSettingsOptionsItem(props: {
           <DisclosureRow
             isLast
             label="Runtime"
-            value={
-              RUNTIME_MODE_CHOICES.find((choice) => choice.mode === session.runtimeMode)?.label
-            }
+            value={runtimeModeChoiceLabel(session.runtimeMode)}
             onPress={() => props.onOpenSubmenu({ kind: "runtime" })}
           />
         </Animated.View>
@@ -898,6 +901,7 @@ function ThreadSettingsChoiceContent(props: {
 }) {
   const insets = useSafeAreaInsets();
   const session = useThreadSettingsSession();
+  const threadMachineLocality = useEnvironmentMachineLocality(session.environmentId);
   const descriptorId = props.submenu.kind === "descriptor" ? props.submenu.id : null;
 
   const activeDescriptor =
@@ -910,7 +914,7 @@ function ThreadSettingsChoiceContent(props: {
   const submenuContent =
     props.submenu.kind === "runtime"
       ? {
-          rows: RUNTIME_MODE_CHOICES.map((choice) => ({
+          rows: runtimeModeChoices(threadMachineLocality).map((choice) => ({
             id: choice.mode,
             label: choice.label,
             description: choice.description,
