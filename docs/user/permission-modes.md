@@ -7,8 +7,8 @@ another mode, or a model without an effort menu, shows the mode next to the mode
 
 Set the default for new threads in **Settings → Threads → New threads → Permissions**.
 Projects can override the environment default. New threads use this setting rather than the
-mode of the thread you were viewing. The initial default is **Full access**; existing threads
-and modes you choose in a draft keep their permissions.
+mode of the thread you were viewing. The initial default is **Auto-accept edits**; existing
+threads and modes you choose in a draft keep their permissions.
 
 | Mode                  | Behavior                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------- |
@@ -19,6 +19,10 @@ and modes you choose in a draft keep their permissions.
 
 Approve or reject requests in the conversation to let the agent continue. Permission modes do
 not prevent the agent from asking questions about the task.
+
+**Full access** lets an agent act without coming back to you at all, so the web app offers it only
+on threads running on a remote environment. It is never the default for new threads, and a thread
+already set to it keeps running in that mode.
 
 ## Provider differences
 

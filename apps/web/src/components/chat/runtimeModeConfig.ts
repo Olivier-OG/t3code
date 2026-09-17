@@ -1,5 +1,9 @@
-import type { RuntimeMode } from "@t3tools/contracts";
+import type { ConnectionTarget } from "@t3tools/client-runtime/connection";
+import type { EnvironmentId, RuntimeMode } from "@t3tools/contracts";
 import { type LucideIcon, LockIcon, PenLineIcon, ShieldOffIcon, SparklesIcon } from "lucide-react";
+
+import { isDesktopLocalConnectionTarget } from "../../connection/desktopLocal";
+import { useEnvironment, usePrimaryEnvironmentId } from "../../state/environments";
 
 export const runtimeModeConfig: Record<
   RuntimeMode,
@@ -28,16 +32,52 @@ export const runtimeModeConfig: Record<
   },
 };
 
-export const runtimeModeOptions = Object.keys(runtimeModeConfig) as RuntimeMode[];
+export const runtimeModeOptions: RuntimeMode[] = ["approval-required", "auto-accept-edits", "auto"];
 
-/** The modes a provider supports (all when it reports none) and the mode a thread really runs in. */
+const remoteRuntimeModeOptions: readonly RuntimeMode[] = [...runtimeModeOptions, "full-access"];
+
+/**
+ * The runtime modes offered for a thread. Full access lets an agent run
+ * anything unprompted, so it is offered only on environments that are not the
+ * machine this client runs on. An environment whose target has not resolved yet
+ * counts as local.
+ */
+export function resolveRuntimeModeOptions(input: {
+  environmentId: EnvironmentId | null;
+  primaryEnvironmentId: EnvironmentId | null;
+  target: ConnectionTarget | undefined;
+}): readonly RuntimeMode[] {
+  const isRemote =
+    input.environmentId !== null &&
+    input.environmentId !== input.primaryEnvironmentId &&
+    input.target !== undefined &&
+    input.target._tag !== "PrimaryConnectionTarget" &&
+    !isDesktopLocalConnectionTarget(input.target);
+  return isRemote ? remoteRuntimeModeOptions : runtimeModeOptions;
+}
+
+export function useRuntimeModeOptions(environmentId: EnvironmentId | null): readonly RuntimeMode[] {
+  const primaryEnvironmentId = usePrimaryEnvironmentId();
+  const environment = useEnvironment(environmentId);
+  return resolveRuntimeModeOptions({
+    environmentId,
+    primaryEnvironmentId,
+    target: environment?.entry.target,
+  });
+}
+
+/**
+ * The offered modes a provider supports (all offered when it reports none) and
+ * the mode a thread really runs in. Pass `useRuntimeModeOptions` for a thread.
+ */
 export function resolveCompatibleRuntimeMode(
   runtimeMode: RuntimeMode,
   supportedRuntimeModes: ReadonlyArray<RuntimeMode> | undefined,
+  offeredModes: ReadonlyArray<RuntimeMode> = runtimeModeOptions,
 ) {
   const modes =
     supportedRuntimeModes && supportedRuntimeModes.length > 0
-      ? runtimeModeOptions.filter((mode) => supportedRuntimeModes.includes(mode))
-      : runtimeModeOptions;
+      ? offeredModes.filter((mode) => supportedRuntimeModes.includes(mode))
+      : offeredModes;
   return { modes, mode: modes.includes(runtimeMode) ? runtimeMode : (modes[0] ?? runtimeMode) };
 }

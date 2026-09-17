@@ -4,7 +4,7 @@ import { DESKTOP_PASTE_AS_TEXT_EVENT } from "../../lib/desktopPasteAsText";
 import {
   resolveCompatibleRuntimeMode,
   runtimeModeConfig,
-  runtimeModeOptions as runtimeModes,
+  useRuntimeModeOptions,
 } from "./runtimeModeConfig";
 import { isLocalEnvironmentDisabled } from "../../localEnvironment";
 import { usePrimaryEnvironmentId } from "../../state/environments";
@@ -283,8 +283,6 @@ function consumePasteAsTextShortcut(deadline: { current: number }): boolean {
   deadline.current = 0;
   return armed;
 }
-
-const runtimeModeOptions = runtimeModes.map((mode) => ({ mode, ...runtimeModeConfig[mode] }));
 
 export interface ChatComposerHandle {
   focusAtEnd: () => void;
@@ -901,14 +899,17 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
     : undefined;
   const resolvedCompactDisabledReason =
     compactDisabledReason ?? (noProviderAvailable ? "Compacting is unavailable right now" : null);
+  const offeredRuntimeModes = useRuntimeModeOptions(environmentId);
   const { modes: compatibleRuntimeModes, mode: compatibleRuntimeMode } =
     resolveCompatibleRuntimeMode(
       runtimeMode,
       selectedProviderEntry?.snapshot.supportedRuntimeModes,
+      offeredRuntimeModes,
     );
-  const compatibleRuntimeModeOptions = runtimeModeOptions.filter((option) =>
-    compatibleRuntimeModes.includes(option.mode),
-  );
+  const compatibleRuntimeModeOptions = compatibleRuntimeModes.map((mode) => ({
+    mode,
+    ...runtimeModeConfig[mode],
+  }));
 
   const providerSendBlockReason = getAntigravitySendBlockReason(
     selectedProviderEntry?.snapshot,
