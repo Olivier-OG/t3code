@@ -78,9 +78,9 @@ describe("ClientSettings rich text composer", () => {
 });
 
 describe("ServerSettings default permissions", () => {
-  it("keeps full access for settings saved before a default was configured", () => {
-    expect(decodeServerSettings({}).defaultRuntimeMode).toBe("full-access");
-    expect(DEFAULT_SERVER_SETTINGS.defaultRuntimeMode).toBe("full-access");
+  it("defaults to auto-accept edits for settings saved before a default was configured", () => {
+    expect(decodeServerSettings({}).defaultRuntimeMode).toBe("auto-accept-edits");
+    expect(DEFAULT_SERVER_SETTINGS.defaultRuntimeMode).toBe("auto-accept-edits");
   });
 
   it.each(["approval-required", "auto-accept-edits", "auto", "full-access"])(
