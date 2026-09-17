@@ -12,12 +12,16 @@ below replayed on top, kept current by rebasing onto upstream by hand and rebuil
 Each change is kept as small as possible so upstream rebases conflict rarely. When touching one,
 stay inside its footprint.
 
-- **The web app does not offer `full-access`.** It lets an agent act without coming back to the
-  user at all, so `runtimeModeOptions` in
-  `apps/web/src/components/chat/runtimeModeConfig.ts` lists `approval-required`,
-  `auto-accept-edits` and `auto`. That one constant feeds both the composer select and Settings →
-  New threads → Permissions; `CompactComposerControlsMenu` hardcodes its radio items, so it drops
-  the same one there. `runtimeModeConfig` still describes all four modes, so a thread already set
+- **The web app offers `full-access` only on remote environments.** It lets an agent act without
+  coming back to the user at all, which weighs most on the machine the client itself runs on, so
+  `runtimeModeOptions` in `apps/web/src/components/chat/runtimeModeConfig.ts` stops at
+  `approval-required`, `auto-accept-edits` and `auto`. That constant feeds Settings → New threads →
+  Permissions, which has no environment to judge; `resolveRuntimeModeOptions` appends
+  `full-access` when a thread's environment is neither the primary one nor a desktop-local backend,
+  and an unresolved target counts as local, so the pre-bootstrap window cannot offer it.
+  `useRuntimeModeOptions` wraps that for `ChatComposer`, which hands one list to its select and to
+  `CompactComposerControlsMenu`, whose radio items upstream hardcodes and this fork maps from the
+  prop. `runtimeModeConfig` still describes all four modes, so a thread already set
   to `full-access` renders its label. `RuntimeMode` in `packages/contracts/src/orchestration.ts`
   keeps all four literals (upstream's schema, no decode transform) and only
   `DEFAULT_RUNTIME_MODE` changes, to `auto-accept-edits`, so a thread never inherits an

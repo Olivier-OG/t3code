@@ -1,5 +1,9 @@
-import type { RuntimeMode } from "@t3tools/contracts";
+import type { ConnectionTarget } from "@t3tools/client-runtime/connection";
+import type { EnvironmentId, RuntimeMode } from "@t3tools/contracts";
 import { type LucideIcon, LockIcon, LockOpenIcon, PenLineIcon, SparklesIcon } from "lucide-react";
+
+import { isDesktopLocalConnectionTarget } from "../../connection/desktopLocal";
+import { useEnvironment, usePrimaryEnvironmentId } from "../../state/environments";
 
 export const runtimeModeConfig: Record<
   RuntimeMode,
@@ -28,3 +32,35 @@ export const runtimeModeConfig: Record<
 };
 
 export const runtimeModeOptions: RuntimeMode[] = ["approval-required", "auto-accept-edits", "auto"];
+
+const remoteRuntimeModeOptions: readonly RuntimeMode[] = [...runtimeModeOptions, "full-access"];
+
+/**
+ * The runtime modes offered for a thread. Full access lets an agent run
+ * anything unprompted, so it is offered only on environments that are not the
+ * machine this client runs on. An environment whose target has not resolved yet
+ * counts as local.
+ */
+export function resolveRuntimeModeOptions(input: {
+  environmentId: EnvironmentId | null;
+  primaryEnvironmentId: EnvironmentId | null;
+  target: ConnectionTarget | undefined;
+}): readonly RuntimeMode[] {
+  const isRemote =
+    input.environmentId !== null &&
+    input.environmentId !== input.primaryEnvironmentId &&
+    input.target !== undefined &&
+    input.target._tag !== "PrimaryConnectionTarget" &&
+    !isDesktopLocalConnectionTarget(input.target);
+  return isRemote ? remoteRuntimeModeOptions : runtimeModeOptions;
+}
+
+export function useRuntimeModeOptions(environmentId: EnvironmentId | null): readonly RuntimeMode[] {
+  const primaryEnvironmentId = usePrimaryEnvironmentId();
+  const environment = useEnvironment(environmentId);
+  return resolveRuntimeModeOptions({
+    environmentId,
+    primaryEnvironmentId,
+    target: environment?.entry.target,
+  });
+}
