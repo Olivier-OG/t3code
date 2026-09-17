@@ -28,7 +28,7 @@ stay inside its footprint.
   This fork publishes no releases, so that URL always 404s and SSH environments fail to prepare
   with `curl: (22)`. `REMOTE_ARCHIVE_UPSTREAM_VERSION` in `apps/desktop/src/main.ts` names the
   upstream release this fork is merged up to instead. Only releases that attach `t3-<version>-*`
-  archives work, which today means the preview train, not stable or nightly.
+  archives work; upstream now attaches them on stable, preview and nightly alike.
 - **Generated branch names carry no `t3code/` prefix.** `buildGeneratedWorktreeBranchName` in
   `ProviderCommandReactor.ts` returns the bare slug. The temporary pre-rename branch keeps its
   prefix, which is how T3 Code recognises its own throwaway branches.
@@ -66,6 +66,6 @@ Merge, never rebase: `main` is published and its history contains earlier merges
    release that attaches `t3-<version>-*` archives, so remote SSH environments run the code this
    sync landed on. Check with
    `curl -s "https://api.github.com/repos/pingdotgg/t3code/releases?per_page=20"` and pick a tag
-   whose assets include `t3-`; nightly builds do not attach them.
+   whose assets include `t3-`. Not every release does, so check rather than assume.
 6. Merge the branch into `main`, push `origin`, and rebuild from this checkout with
    `scripts/build-local-dmg.sh --install`, which replaces the app in `/Applications`.

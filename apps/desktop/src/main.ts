@@ -94,10 +94,11 @@ const desktopEnvironmentLayer = Layer.unwrap(
  * nothing, so that URL is always a 404 and every SSH environment fails to
  * prepare. Name the upstream release this fork is merged up to instead, which
  * keeps the desktop and the remote server on one wire protocol. Bump this when
- * syncing upstream; only releases that actually attach `t3-<version>-*`
- * archives work, which today means the preview train.
+ * syncing upstream, to the newest release that actually attaches
+ * `t3-<version>-*` archives; upstream now does so on stable, preview and
+ * nightly alike.
  */
-const REMOTE_ARCHIVE_UPSTREAM_VERSION = "0.0.41-preview.20260914.1693";
+const REMOTE_ARCHIVE_UPSTREAM_VERSION = "0.0.42";
 
 // Development points the remote at a source checkout instead so the two sides
 // can be iterated together.
