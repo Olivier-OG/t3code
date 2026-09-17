@@ -103,6 +103,9 @@ const layerDesktopEnvironment = Layer.unwrap(
   }),
 );
 
+// Fork: this fork publishes no releases, so environment.appVersion always 404s.
+// Name the upstream release we are merged up to; bump it on each sync.
+const REMOTE_ARCHIVE_UPSTREAM_VERSION = "0.1.5";
 const resolveDesktopSshCliRunner = (
   environment: DesktopEnvironment.DesktopEnvironment["Service"],
 ): RemoteT3RunnerOptions => {
@@ -113,7 +116,7 @@ const resolveDesktopSshCliRunner = (
       nodeEngineRange: serverPackageJson.engines.node,
     };
   }
-  return { archiveVersion: environment.appVersion };
+  return { archiveVersion: REMOTE_ARCHIVE_UPSTREAM_VERSION };
 };
 
 const layerDesktopSshEnvironment = Layer.unwrap(
