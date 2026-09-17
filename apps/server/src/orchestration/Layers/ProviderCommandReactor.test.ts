@@ -2595,6 +2595,10 @@ describe("ProviderCommandReactor", () => {
     );
     expect(harness.generateBranchName.mock.calls[0]?.[0].message).not.toContain("t3-citation://");
     expect(harness.refreshStatus.mock.calls[0]?.[0]).toBe("/tmp/provider-project-worktree");
+    expect(harness.renameBranch.mock.calls[0]?.[0]).toMatchObject({
+      oldBranch: "t3code/1234abcd",
+      newBranch: expect.stringMatching(/^feature\//),
+    });
     const readModel = await harness.readModel();
     expect(
       readModel.threads
