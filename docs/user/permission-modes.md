@@ -18,8 +18,8 @@ threads and modes you choose in a draft keep their permissions.
 Approve or reject requests in the conversation to let the agent continue. Permission modes do
 not prevent the agent from asking questions about the task.
 
-**Auto** and **Full access** let an agent act on your machine without coming back to you, so
-the web app does not offer them. A thread already set to one keeps running in that mode.
+**Full access** lets an agent act on your machine without coming back to you at all, so the web
+app does not offer it. A thread already set to it keeps running in that mode.
 
 ## Provider differences
 
