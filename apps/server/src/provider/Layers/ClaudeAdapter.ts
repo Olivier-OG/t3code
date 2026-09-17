@@ -4699,8 +4699,7 @@ export const makeClaudeAdapter = Effect.fn("makeClaudeAdapter")(function* (
           } satisfies PermissionResult;
         }
 
-        const runtimeMode = input.runtimeMode ?? "full-access";
-        if (runtimeMode === "full-access") {
+        if (input.runtimeMode === "full-access") {
           return {
             behavior: "allow",
             updatedInput: toolInput,

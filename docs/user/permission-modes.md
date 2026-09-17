@@ -5,8 +5,8 @@ composer; it applies to that thread.
 
 Set the default for new threads in **Settings → General → New threads → Permissions**.
 Projects can override the environment default. New threads use this setting rather than the
-mode of the thread you were viewing. The initial default is **Full access**; existing threads
-and modes you choose in a draft keep their permissions.
+mode of the thread you were viewing. The initial default is **Auto-accept edits**; existing
+threads and modes you choose in a draft keep their permissions.
 
 | Mode                  | Behavior                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------- |
@@ -17,6 +17,9 @@ and modes you choose in a draft keep their permissions.
 
 Approve or reject requests in the conversation to let the agent continue. Permission modes do
 not prevent the agent from asking questions about the task.
+
+**Auto** and **Full access** let an agent act on your machine without coming back to you, so
+the web app does not offer them. A thread already set to one keeps running in that mode.
 
 ## Provider differences
 
