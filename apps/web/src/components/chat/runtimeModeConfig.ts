@@ -27,4 +27,4 @@ export const runtimeModeConfig: Record<
   },
 };
 
-export const runtimeModeOptions = Object.keys(runtimeModeConfig) as RuntimeMode[];
+export const runtimeModeOptions: RuntimeMode[] = ["approval-required", "auto-accept-edits"];
