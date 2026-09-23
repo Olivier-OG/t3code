@@ -19,16 +19,17 @@ stay inside its footprint.
   Permissions, which has no environment to judge; `resolveRuntimeModeOptions` appends
   `full-access` when a thread's environment is neither the primary one nor a desktop-local backend,
   and an unresolved target counts as local, so the pre-bootstrap window cannot offer it.
-  `useRuntimeModeOptions` wraps that for `ChatComposer`, which hands one list to its select and to
-  `CompactComposerControlsMenu`, whose radio items upstream hardcodes and this fork maps from the
-  prop. `runtimeModeConfig` still describes all four modes, so a thread already set
-  to `full-access` renders its label. `RuntimeMode` in `packages/contracts/src/orchestration.ts`
+  `useRuntimeModeOptions` wraps that for `ChatComposer`, which feeds it into upstream's
+  per-provider `compatibleRuntimeModeOptions` filter, so its select and `CompactComposerControlsMenu`
+  both get the result. `runtimeModeConfig` still describes all four modes, so a thread already set
+  to `full-access` renders its label. `RuntimeMode` in `packages/contracts/src/providerPolicy.ts`
   keeps all four literals (upstream's schema, no decode transform) and only
-  `DEFAULT_RUNTIME_MODE` changes, to `auto-accept-edits`, so a thread never inherits an
-  unprompted mode without a choice. The same
-  default replaces upstream's `?? "full-access"` fallback in `ProviderService`,
-  `ProviderSessionDirectory` and `ProviderRuntimeIngestion`, and `ClaudeAdapter`'s `canUseTool` reads `input.runtimeMode`
-  directly rather than defaulting it to `full-access`. `docs/user/permission-modes.md` states the
+  `DEFAULT_RUNTIME_MODE` changes there and in `apps/web/src/types.ts`, to `auto-accept-edits`, so a
+  thread never inherits an unprompted mode without a choice. The server needs nothing: upstream's
+  orchestrator carries the mode as a required field and its MCP fallbacks are
+  `approval-required`. The scheduled-task form in `ScheduledTasksSettings.tsx` has no picker and
+  upstream creates every task in `full-access`; this fork uses `auto`, since a task runs unattended
+  and a mode that waits on approvals would stall it. `docs/user/permission-modes.md` states the
   rule. Everything else is upstream's, including the whole mobile picker — the phone still offers
   all four.
 
@@ -39,12 +40,13 @@ stay inside its footprint.
   upstream release this fork is rebased onto instead. Only releases that attach `t3-<version>-*`
   archives work; upstream now attaches them on stable, preview and nightly alike.
 
-- **Worktree branch names carry no `t3code/` prefix.** `buildGeneratedWorktreeBranchName` in
-  `ProviderCommandReactor.ts` returns the bare slug, and `buildTemporaryWorktreeBranchName` in
-  `packages/shared/src/git.ts` returns the bare `<8 hex>` token. `TEMP_WORKTREE_BRANCH_PATTERN`
-  makes the prefix optional so worktrees created before this change stay recognisable. Note the
-  cost: a bare 8-hex branch is what T3 Code recognises as its own throwaway, so a user branch
-  named like one (`abc12345`) is eligible for automatic renaming.
+- **Worktree branch names carry no `t3/` prefix.** Upstream made the generated-name prefix a
+  setting; this fork defaults `branchNamePrefix` in `packages/contracts/src/settings.ts` to `""`,
+  so generated names are the bare slug unless the user sets one. `buildTemporaryWorktreeBranchName`
+  in `packages/shared/src/git.ts` returns the bare `<8 hex>` token, and
+  `TEMP_WORKTREE_BRANCH_PATTERN` also accepts it next to every upstream shape, so older worktrees
+  stay recognisable. Note the cost: a bare 8-hex branch is what T3 Code recognises as its own
+  throwaway, so a user branch named like one (`abc12345`) is eligible for automatic renaming.
 
 - **Rebrand to T4.** The wordmark path in `apps/web/src/components/T3Wordmark.tsx` and its
   `aria-label` in `SidebarChrome.tsx`. That component also renders in the welcome wizard and the
@@ -54,6 +56,11 @@ stay inside its footprint.
 - **A local macOS build script.** `scripts/build-local-dmg.sh` wraps `dist:desktop:artifact` to
   build an unsigned DMG and swap it into `/Applications`; `docs/operations/development.md`
   documents it. Purely additive, since this fork ships no releases to install from.
+
+- **A sync skill.** `.agents/skills/merge-with-upstream/SKILL.md` walks the procedure below and
+  carries the operational traps that keep biting: a clean rebase is not proof a fork change is
+  still wired up, `vp run -F` silently skips a filter that matches nothing, and installing the
+  build quits the app that is running the agent. Purely additive, alongside upstream's skills.
 
 Retired: the fork once patched Claude text generation to stop passing
 `--dangerously-skip-permissions`. Upstream now isolates that CLI call itself, so the fork carries
@@ -84,7 +91,7 @@ Other worktrees and any branch cut from the old `main` need a reset afterwards.
    above.
 3. Sweep for regressions the rebase cannot flag: `grep -rn "runtimeModeOptions\|DEFAULT_RUNTIME_MODE\|full-access"`
    in `apps/web/src` and `packages/contracts/src` should cover every place a runtime mode is
-   offered or defaulted, and `grep -rn '?? "full-access"' apps/server/src` should come back empty. A new upstream mode picker that builds its own option list, or a changed
+   offered or defaulted, and `grep -rn '?? "full-access"' apps/server/src` should list only tests. A new upstream mode picker that builds its own option list, or a changed
    default, shows up here.
 4. Verify with `vp i`, then typecheck and the focused tests for contracts, web, desktop and
    server. Run mobile typecheck too when the sync touched `apps/mobile`.
