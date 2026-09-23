@@ -55,6 +55,11 @@ stay inside its footprint.
   build an unsigned DMG and swap it into `/Applications`; `docs/operations/development.md`
   documents it. Purely additive, since this fork ships no releases to install from.
 
+- **A sync skill.** `.agents/skills/merge-with-upstream/SKILL.md` walks the procedure below and
+  carries the operational traps that keep biting: a clean rebase is not proof a fork change is
+  still wired up, `vp run -F` silently skips a filter that matches nothing, and installing the
+  build quits the app that is running the agent. Purely additive, alongside upstream's skills.
+
 Retired: the fork once patched Claude text generation to stop passing
 `--dangerously-skip-permissions`. Upstream now isolates that CLI call itself, so the fork carries
 upstream's version.
